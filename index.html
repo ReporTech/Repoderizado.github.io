@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es" class="light dark">
+
+<head>
+
+  <meta charset="UTF-8">
+  <title>Formulario - RepoChiste</title>
+
+  <script src="js/registraServiceWorker.js"></script>
+
+  <meta name="viewport" content="width=device-width">
+  <meta name="theme-color" content="#fffbfe">
+  <link rel="icon" sizes="48x48" href="favicon.ico">
+  <link rel="manifest" href="site.webmanifest">
+  <script src="ungap/custom-elements.js"></script>
+
+  <script type="module" src="js/configura.js"></script>
+  <link rel="stylesheet" href="css/estilos.css">
+  <link rel="stylesheet" href="css/transicion_pestanas.css">
+  
+  <link rel="stylesheet" href="css/dark-hc.css">
+  <link rel="stylesheet" href="css/dark-mc.css">
+  <link rel="stylesheet" href="css/dark.css">
+  <link rel="stylesheet" href="css/light-hc.css">
+  <link rel="stylesheet" href="css/light-mc.css">
+  <link rel="stylesheet" href="css/light.css">
+
+</head>
+
+<md-top-app-bar adicional="tab" headline="headline">
+</md-top-app-bar>
+
+<md-top-app-bar class="center-aligned">
+  <h1 id="headline">Servicio que procesa un formulario</h1>
+</md-top-app-bar>
+
+<nav-tab-fixed id="tab"></nav-tab-fixed>
+
+<body>
+
+  <form id="chisteForm" novalidate onsubmit="procesa(event)">
+
+
+    <main>
+
+      <p>
+        <span class="md-filled-text-field" accesskey="G">
+          <md-select-menu id="nombre" required aria-labelledby="etiquetaNombre" options="opcionesDeIntegrantes"
+            oninput="copiaMensajes()"></md-select-menu>
+          <span id="etiquetaNombre" accesskey="N">Integrante *</span>
+          <small id="supportingIntegrante">Obligatorio</small>
+        </span>
+      </p>
+
+      <p>
+        <button type="submit" class="md-filled-button" style="width: 100%;">Chiste</button>
+
+      </p>
+
+    </main>
+
+    <md-options-menu id="opcionesDeIntegrantes" aria-label="Opciones de Integrantes de 11:11">
+      <span data-value="" title="Selecciona un integrante"></span>
+      <span data-value="Balbuena">Yahir Balbuena</span>
+        <span data-value="Miguel">Miguel Chan</span>
+        <span data-value="Josue">Carlo de Paul</span>
+        <span data-value="Gael">Gael Martinez</span>
+        <span data-value="Roberto">Roberto Meza</span>
+        <span data-value="Chula">Jose Chula</span>
+        <span data-value="Jorge">Jorge Serrano</span>
+    </md-options-menu>
+
+    <nav-drw></nav-drw>
+
+  </form>
+
+
+  <script type="module">
+    import { muestraError } from "./lib/js/muestraError.js";
+    import { muestraTextoDeAyuda } from "./lib/js/muestraTextoDeAyuda.js";
+
+    // Función para mostrar mensajes de ayuda
+    function copiaMensajes() {
+      const nombre = document.getElementById('nombre');
+      muestraTextoDeAyuda(nombre, supportingIntegrante, "* Obligatorio");
+    }
+
+    window["copiaMensajes"] = copiaMensajes;
+
+    // Función que procesa el formulario
+    function procesa(evt) {
+      evt.preventDefault();
+      try {
+        copiaMensajes();
+        if (nombre.validity.valid) {
+          const nombreSeleccionado = nombre.value;
+
+          // Enviar al servicio PHP
+          let formData = new FormData();
+          formData.append('nombre', nombreSeleccionado);
+
+          fetch('srv/procesa.php', {
+            method: 'POST',
+            body: formData
+          })
+            .then(response => response.json())
+            .then(data => {
+              alert(data.chiste); // Mostrar el chiste en un alert
+            })
+            .catch(error => {
+              muestraError(error); // Manejar el error
+            });
+        }
+      } catch (e) {
+        muestraError(e);
+      }
+    }
+    window["procesa"] = procesa;
+  </script>
+
+</body>
+
+</html>
